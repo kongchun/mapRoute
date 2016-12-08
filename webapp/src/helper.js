@@ -28,24 +28,19 @@ function filterPoint(arr) {
 	arr = arr.map((x) => {
 		return x[0] + "," + x[1];
 	})
-	arr = filterSameNext(arr);
+	arr = filterSameNextStr(arr);
 	arr = arr.map((x) => x.split(","));
 	return arr;
 }
 
-function filterSameNext(arr) {
-	var arr2 = [];
-	var flag = true;
-	arr.reduce(function(previous, current) {
-		if (flag) {
-			arr2.push(previous);
-			flag = false;
+function filterSameNextStr(arr) {
+	var p, arr2 = [];
+	arr.forEach((i) => {
+		if (i != p || !p) {
+			arr2.push(i)
 		}
-		if (previous != current) {
-			arr2.push(current);
-		}
-		return current;
-	});
+		p = i;
+	})
 	return arr2;
 }
 
