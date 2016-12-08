@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%=title%></title>
+    <link rel="stylesheet" href="/css/vendor.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="http://api.map.baidu.com/getscript?v=2.0&ak=8hr2ZB5zsFI6dcId9Uj6ORy2kuLIP8vA"></script>
+</head>
+
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand hidden-sm">足迹</a>
+        </div>
+      </div>
+    </div>
+
+     <div id="main-content" >
+            <div class="container">
+                <div class="row">
+                 <div class="panel panel-default">
+                  <div class="panel-body">
+                   <div class="row">
+                      <div class="col-lg-12">
+                        <div class="input-group">
+                        <span class="input-group-addon">ID</span>
+                        <input type="text" class="form-control" placeholder="ff7cfb0e717cc3a48af443209168ef92" id="userId">
+                         <span class="input-group-addon">日期</span>
+                        <input type="text" class="form-control" placeholder="20160105" id="date">
+                        <span class="input-group-btn">
+                          <button class="btn btn-default" type="button" id="search">查询</button>
+                        </span>
+                      </div>
+                      </div>
+                      <div class="col-lg-3">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="panel-body">
+                     <div id="map"></div>
+                  </div>
+                   <div class="panel-body">
+                     坐标路径:<div id="path"></div>
+                  </div>
+                </div>
+                </div>
+            </div>
+    </div>
+          
+    <script src="/js/vendor.js"></script>
+    <script src="/js/vendor.bundle.js"></script>
+    <script src="/js/bundle.js"></script>
+</body>
+
+</html>
