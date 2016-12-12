@@ -1,14 +1,26 @@
 var Helper = require("./helper.js");
-var walkingGpsLine = function(map, ...arr) {
-	return walkingGpsPois(map, ...arr).then(function(arr) {
-		var line = new BMap.Polyline(arr, {
+var arr = [];
+
+
+function clear(map) {
+	alert(arr.length)
+	if (arr.length > 0) {
+		arr.map((i) => {
+			map.removeOverlay(i);
+		})
+		arr = [];
+	}
+}
+
+var walkingGpsLine = function(map, ...points) {
+	clear(map);
+	return walkingGpsPois(map, ...points).then(function(point) {
+		var line = new BMap.Polyline(point, {
 			strokeColor: '#080'
 		})
+		arr.push(line);
 		map.addOverlay(line);
-		return {
-			line,
-			arr
-		};
+		return arr;
 	})
 }
 

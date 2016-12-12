@@ -34,10 +34,20 @@
                    <div class="row">
                       <div class="col-lg-12">
                         <div class="input-group">
-                        <span class="input-group-addon">ID</span>
-                        <input type="text" class="form-control" placeholder="ff7cfb0e717cc3a48af443209168ef92" id="userId">
+                        <span class="input-group-addon">IMEI</span>
+                        <select class="form-control" id="userId">
+                          <% IMEI.forEach(function(item){ %>  
+                          <option value="<%= item %>"><%= item %></option>
+                          <% }) %>  
+                        </select>
                          <span class="input-group-addon">日期</span>
-                        <input type="text" class="form-control" placeholder="20160105" id="date">
+                         <select class="form-control" id="date">
+                          <% date.forEach(function(item){ %>  
+                          <option value="<%= item.date %>"><%= item.date +" " +item.week%></option>
+                          <% }) %>  
+                        </select>
+
+                       
                         <span class="input-group-btn">
                           <button class="btn btn-default" type="button" id="search">查询</button>
                         </span>
