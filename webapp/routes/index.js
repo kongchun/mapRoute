@@ -11,7 +11,7 @@ router.get('/', function(req, res, next) {
 	}).then(function(imei) {
 		read.getDate().then(function(date) {
 			res.render('index', {
-				title: '测试路径',
+				title: '足迹',
 				IMEI: imei,
 				date: date
 			});

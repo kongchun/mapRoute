@@ -68,8 +68,10 @@ function getLabels(count) {
 function walkLine(route) {
 	//console.log(Helper.filterPoint(route), "filter");
 	var points = makePoint(Helper.filterPoint(route));
-	G_Map.centerAndZoom(points[0], 15);
-	walkRoute.line(G_Map, ...points);
+	G_Map.setViewport(points);
+	walkRoute.line(G_Map, ...points).then(function(arr) {
+
+	});
 }
 
 function saveWalkLine(arr) {
@@ -94,7 +96,7 @@ function initMap() {
 		anchor: BMAP_ANCHOR_TOP_RIGHT
 	}); // 左上角，添加比例尺
 	var point = new BMap.Point(121.39324, 31.21182001); // 创建点坐标  
-	map.centerAndZoom(point, 15); // 初始化地图，设置中心点坐标和地图级别  
+	map.centerAndZoom(point, 12); // 初始化地图，设置中心点坐标和地图级别  
 	map.addControl(top_left_navigation);
 	map.addControl(top_left_control);
 	map.enableScrollWheelZoom(); //启用滚轮放大缩小，默认禁用
