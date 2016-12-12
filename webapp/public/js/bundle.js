@@ -288,7 +288,6 @@ function renderMap(route, count) {
 
 	var labels = getLabels(count);
 	marker.labels(G_Map, labels);
-	//marker.labels(labels);
 }
 
 function getLabels(count) {
@@ -441,7 +440,6 @@ var Helper = require("./helper.js");
 var arr = [];
 
 function clear(map) {
-	alert(arr.length);
 	if (arr.length > 0) {
 		arr.map(function (i) {
 			map.removeOverlay(i);

@@ -3,7 +3,6 @@ var arr = [];
 
 
 function clear(map) {
-	alert(arr.length)
 	if (arr.length > 0) {
 		arr.map((i) => {
 			map.removeOverlay(i);

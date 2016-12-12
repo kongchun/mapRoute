@@ -45,7 +45,6 @@ function renderMap(route, count) {
 
 	var labels = getLabels(count);
 	marker.labels(G_Map, labels);
-	//marker.labels(labels);
 }
 
 function getLabels(count) {
