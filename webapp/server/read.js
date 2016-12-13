@@ -8,7 +8,8 @@ exports.getWithDateAndId = function(id, date) {
 			"date": date
 		}, {
 			norepeatroute: 1,
-			routecount: 1
+			routecount: 1,
+			walkRoute: 1
 		})
 	}).then(function(data) {
 		db.close();

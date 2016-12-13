@@ -12,15 +12,20 @@ function clear(map) {
 }
 
 var walkingGpsLine = function(map, ...points) {
-	clear(map);
+
 	return walkingGpsPois(map, ...points).then(function(point) {
-		var line = new BMap.Polyline(point, {
-			strokeColor: '#080'
-		})
-		arr.push(line);
-		map.addOverlay(line);
-		return arr;
+		return polyline(map, point);
 	})
+}
+
+var polyline = function(map, points) {
+	clear(map);
+	var line = new BMap.Polyline(points, {
+		strokeColor: '#080'
+	})
+	arr.push(line);
+	map.addOverlay(line);
+	return Promise.resolve(points);
 }
 
 var walkingGpsPois = function(map, ...arr) {
@@ -55,7 +60,8 @@ var walkingLinePois = function(map, p1, p2) {
 
 var WalkRoute = {
 	line: walkingGpsLine,
-	pois: walkingGpsPois
+	pois: walkingGpsPois,
+	polyline: polyline
 }
 
 module.exports = WalkRoute;

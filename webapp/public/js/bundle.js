@@ -260,7 +260,7 @@ $(function () {
 		$.getJSON(url, function (json, textStatus) {
 			if (json.result) {
 				if (json.data && json.data.norepeatroute) {
-					renderMap(json.data.norepeatroute, json.data.routecount);
+					renderMap(json.data);
 				} else {
 					alert("没有找到记录");
 				}
@@ -273,6 +273,7 @@ $(function () {
 	// var labels = getLabels();
 	// marker.labels(G_Map, labels);
 	// console.log("labels", labels)
+	//saveWalkline()
 });
 
 function gpsCover(lng, lat) {
@@ -281,9 +282,24 @@ function gpsCover(lng, lat) {
 	return [parseFloat(bd.lon), parseFloat(bd.lat)];
 }
 
-function renderMap(route, count) {
-	walkLine(route);
+function renderMap(data) {
+	var route = data.norepeatroute;
+	var count = data.routecount;
+	var _id = data._id;
+	var walkRouteData = data.walkRoute;
+
 	var points = makePoint(route);
+	G_Map.setViewport(points);
+
+	if (walkRouteData) {
+		console.log(walkRouteData);
+		walkRoute.polyline(G_Map, walkRouteData.map(function (point) {
+			return new BMap.Point(point.lng, point.lat);
+		}));
+	} else {
+		walkLine(_id, points);
+	}
+
 	marker.points(G_Map, points);
 
 	var labels = getLabels(count);
@@ -306,11 +322,27 @@ function getLabels(count) {
 	return labels;
 }
 
-function walkLine(route) {
+function walkLine(_id, points) {
 	//console.log(Helper.filterPoint(route), "filter");
-	var points = makePoint(Helper.filterPoint(route));
-	G_Map.setViewport(points);
-	walkRoute.line.apply(walkRoute, [G_Map].concat(_toConsumableArray(points))).then(function (arr) {});
+
+	walkRoute.line.apply(walkRoute, [G_Map].concat(_toConsumableArray(points))).then(function (arr) {
+		saveWalkline(_id, arr);
+	});
+}
+
+function saveWalkline(_id, walkRoute) {
+
+	/*var _id = "584e119559a5f00f64d8c1d3";
+ var walkRoute = [{
+ 	lng: 121.429368,
+ 	lat: 31.132967
+ }]
+ */
+	var url = "api/route/walk";
+	$.post(url, {
+		_id: _id,
+		walkRoute: JSON.stringify(walkRoute)
+	}, function () {});
 }
 
 function saveWalkLine(arr) {
@@ -449,20 +481,23 @@ function clear(map) {
 }
 
 var walkingGpsLine = function walkingGpsLine(map) {
-	clear(map);
-
 	for (var _len = arguments.length, points = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
 		points[_key - 1] = arguments[_key];
 	}
 
 	return walkingGpsPois.apply(undefined, [map].concat(points)).then(function (point) {
-		var line = new BMap.Polyline(point, {
-			strokeColor: '#080'
-		});
-		arr.push(line);
-		map.addOverlay(line);
-		return arr;
+		return polyline(map, point);
 	});
+};
+
+var polyline = function polyline(map, points) {
+	clear(map);
+	var line = new BMap.Polyline(points, {
+		strokeColor: '#080'
+	});
+	arr.push(line);
+	map.addOverlay(line);
+	return Promise.resolve(points);
 };
 
 var walkingGpsPois = function walkingGpsPois(map) {
@@ -498,7 +533,8 @@ var walkingLinePois = function walkingLinePois(map, p1, p2) {
 
 var WalkRoute = {
 	line: walkingGpsLine,
-	pois: walkingGpsPois
+	pois: walkingGpsPois,
+	polyline: polyline
 };
 
 module.exports = WalkRoute;

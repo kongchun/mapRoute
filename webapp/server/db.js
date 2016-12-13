@@ -1,7 +1,9 @@
 var mongodb = require("mongodb");
 
 var MongoClient = mongodb.MongoClient;
-var url = 'mongodb://10.82.0.1:27017/unicom';
+var DB_URL = process.env.DB_URL || '127.0.0.1'
+var url = 'mongodb://' + DB_URL + ':27017/unicom';
+//console.log(url);
 class DB {
 	constructor() {
 		this.db = null;

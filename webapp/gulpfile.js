@@ -31,7 +31,7 @@ gulp.task('vendor-css', function() {
 gulp.task('vendor', ['vendor-css'], function() {
 	return gulp.src([
 			'node_modules/jquery/dist/jquery.js',
-			'node_modules/bootstrap/dist/js/bootstrap.js',
+			'node_modules/bootstrap/dist/js/bootstrap.js'
 			//'node_modules/headroom.js/dist/headroom.js',
 			//'node_modules/headroom.js/dist/jQuery.headroom.js'
 		]).pipe(concat('vendor.js'))
@@ -101,6 +101,7 @@ gulp.task('watch', ['build'], function() {
 gulp.task('server', ['watch'], function() {
 	process.env.NODE_ENV = 'development';
 	process.env.debug = 'mapRoute:*';
+	process.env.DB_URL = '10.82.0.1';
 	//process.env.port = '80';
 	// Start the server at the beginning of the task
 	server.run(['./bin/www']);

@@ -15,7 +15,7 @@ $(function() {
 		$.getJSON(url, function(json, textStatus) {
 			if (json.result) {
 				if (json.data && json.data.norepeatroute) {
-					renderMap(json.data.norepeatroute, json.data.routecount);
+					renderMap(json.data);
 				} else {
 					alert("没有找到记录")
 				}
@@ -30,6 +30,7 @@ $(function() {
 	// var labels = getLabels();
 	// marker.labels(G_Map, labels);
 	// console.log("labels", labels)
+	//saveWalkline()
 })
 
 function gpsCover(lng, lat) {
@@ -38,9 +39,24 @@ function gpsCover(lng, lat) {
 	return [parseFloat(bd.lon), parseFloat(bd.lat)]
 }
 
-function renderMap(route, count) {
-	walkLine(route);
-	var points = makePoint(route);
+function renderMap(data) {
+	var route = data.norepeatroute;
+	var count = data.routecount;
+	var _id = data._id;
+	var walkRouteData = data.walkRoute;
+
+	var points = makePoint((route));
+	G_Map.setViewport(points);
+
+	if (walkRouteData) {
+		console.log(walkRouteData)
+		walkRoute.polyline(G_Map, walkRouteData.map((point) => {
+			return new BMap.Point(point.lng, point.lat);
+		}));
+	} else {
+		walkLine(_id, points);
+	}
+
 	marker.points(G_Map, points);
 
 	var labels = getLabels(count);
@@ -65,13 +81,29 @@ function getLabels(count) {
 }
 
 
-function walkLine(route) {
+function walkLine(_id, points) {
 	//console.log(Helper.filterPoint(route), "filter");
-	var points = makePoint(Helper.filterPoint(route));
-	G_Map.setViewport(points);
-	walkRoute.line(G_Map, ...points).then(function(arr) {
 
+	walkRoute.line(G_Map, ...points).then(function(arr) {
+		saveWalkline(_id, arr);
 	});
+}
+
+function saveWalkline(_id, walkRoute) {
+
+	/*var _id = "584e119559a5f00f64d8c1d3";
+	var walkRoute = [{
+		lng: 121.429368,
+		lat: 31.132967
+	}]
+*/
+	var url = "api/route/walk";
+	$.post(url, {
+		_id: _id,
+		walkRoute: JSON.stringify(walkRoute)
+	}, function() {
+
+	})
 }
 
 function saveWalkLine(arr) {
