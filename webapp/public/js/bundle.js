@@ -243,7 +243,7 @@ module.exports = Helper;
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-var walkRoute = require("./walkRoute.js");
+var route = require("./route.js");
 var Helper = require("./helper.js");
 var GPS = require("./gps.js");
 var marker = require("./marker.js");
@@ -273,7 +273,7 @@ $(function () {
 	// var labels = getLabels();
 	// marker.labels(G_Map, labels);
 	// console.log("labels", labels)
-	//saveWalkline()
+	//saverouteLine()
 });
 
 function gpsCover(lng, lat) {
@@ -283,54 +283,36 @@ function gpsCover(lng, lat) {
 }
 
 function renderMap(data) {
-	var route = data.norepeatroute;
-	var count = data.routecount;
+	var norepeatroute = data.norepeatroute;
+	var routecount = data.routecount;
 	var _id = data._id;
-	var walkRouteData = data.walkRoute;
+	var routeLineData = data.routeLine;
 
-	var points = makePoint(route);
+	var points = makePoint(norepeatroute);
 	G_Map.setViewport(points);
 
-	if (walkRouteData) {
-		console.log(walkRouteData);
-		walkRoute.polyline(G_Map, walkRouteData.map(function (point) {
+	if (routeLineData) {
+		//console.log(routeLineData)
+		route.polyline(G_Map, routeLineData.map(function (point) {
 			return new BMap.Point(point.lng, point.lat);
 		}));
 	} else {
-		walkLine(_id, points);
+		routeLine(_id, points);
 	}
 
 	marker.points(G_Map, points);
-
-	var labels = getLabels(count);
-	marker.labels(G_Map, labels);
+	marker.labels(G_Map, routecount);
 }
 
-function getLabels(count) {
-
-	var labels = count.map(function (item) {
-		var location = item.location;
-		var label = item.timerange;
-		var point = new (Function.prototype.bind.apply(BMap.Point, [null].concat(_toConsumableArray(location))))();
-
-		return {
-			point: point,
-			label: label
-		};
-	});
-
-	return labels;
-}
-
-function walkLine(_id, points) {
+function routeLine(_id, points) {
 	//console.log(Helper.filterPoint(route), "filter");
 
-	walkRoute.line.apply(walkRoute, [G_Map].concat(_toConsumableArray(points))).then(function (arr) {
-		saveWalkline(_id, arr);
+	route.line.apply(route, [G_Map].concat(_toConsumableArray(points))).then(function (arr) {
+		saveLine(_id, arr);
 	});
 }
 
-function saveWalkline(_id, walkRoute) {
+function saveLine(_id, routePath) {
 
 	/*var _id = "584e119559a5f00f64d8c1d3";
  var walkRoute = [{
@@ -338,14 +320,14 @@ function saveWalkline(_id, walkRoute) {
  	lat: 31.132967
  }]
  */
-	var url = "api/route/walk";
+	var url = "api/route/line";
 	$.post(url, {
 		_id: _id,
-		walkRoute: JSON.stringify(walkRoute)
+		line: JSON.stringify(routePath)
 	}, function () {});
 }
 
-function saveWalkLine(arr) {
+function saverouteLine(arr) {
 	var pois = arr.map(function (point) {
 		return point.lng + "," + point.lat;
 	});
@@ -374,8 +356,10 @@ function initMap() {
 	map.enableContinuousZoom(); //启用地图惯性拖拽，默认禁用
 }
 
-},{"./gps.js":1,"./helper.js":2,"./marker.js":4,"./walkRoute.js":5}],4:[function(require,module,exports){
+},{"./gps.js":1,"./helper.js":2,"./marker.js":4,"./route.js":5}],4:[function(require,module,exports){
 "use strict";
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var Helper = require("./helper.js");
 
@@ -434,22 +418,37 @@ var points = function points(map, _points) {
 
 var labels = function labels(map, routecount) {
 	routecount.map(function (i) {
-		label(map, i.point, i.label);
+		var location = i.location;
+		var point = new (Function.prototype.bind.apply(BMap.Point, [null].concat(_toConsumableArray(location))))();
+		var addressLabel = "";
+
+		var pois = location.join(",");
+		var poisLabel = "<p><b>\u5750\u6807\uFF1A</b>" + pois + "</p>";
+
+		var address = i.address;
+		if (address) {
+			var name = address.name;
+			var tag = address.tag;
+			addressLabel = "<p><b>\u5730\u70B9\uFF1A</b>" + name + "</p><p><b>\u6807\u7B7E\uFF1A</b>" + tag + "</p>";
+		}
+		var time = i.timerange.map(function (i) {
+			return "" + i;
+		}).join(",");
+
+		var labels = "<p><b>\u65F6\u95F4\uFF1A</b>" + time + "</p>" + addressLabel + poisLabel;
+
+		label(map, point, labels);
 	});
 };
 
 var label = function label(map, point, label) {
-	var labels = label.map(function (i) {
-		return "<p>" + i + "</p>";
-	}).join("");
 	var opts = {
 		position: point, // 指定文本标注所在的地理位置
-		offset: new BMap.Size(25, -(12 * label.length) - 30) //设置文本偏移量
+		offset: new BMap.Size(25, -60) //设置文本偏移量
 	};
-	var label = new BMap.Label(labels, opts); // 创建文本标注对象
+	var label = new BMap.Label(label, opts); // 创建文本标注对象
 	label.setStyle({
 		borderColor: "#222"
-
 	});
 	arr.push(label);
 	map.addOverlay(label);
@@ -480,16 +479,7 @@ function clear(map) {
 	}
 }
 
-var walkingGpsLine = function walkingGpsLine(map) {
-	for (var _len = arguments.length, points = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-		points[_key - 1] = arguments[_key];
-	}
-
-	return walkingGpsPois.apply(undefined, [map].concat(points)).then(function (point) {
-		return polyline(map, point);
-	});
-};
-
+//划线
 var polyline = function polyline(map, points) {
 	clear(map);
 	var line = new BMap.Polyline(points, {
@@ -500,7 +490,17 @@ var polyline = function polyline(map, points) {
 	return Promise.resolve(points);
 };
 
-var walkingGpsPois = function walkingGpsPois(map) {
+var line = function line(map) {
+	for (var _len = arguments.length, points = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+		points[_key - 1] = arguments[_key];
+	}
+
+	return getLinePoints.apply(undefined, [map].concat(points)).then(function (point) {
+		return polyline(map, point);
+	});
+};
+
+var getLinePoints = function getLinePoints(map) {
 	for (var _len2 = arguments.length, arr = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
 		arr[_key2 - 1] = arguments[_key2];
 	}
@@ -510,7 +510,14 @@ var walkingGpsPois = function walkingGpsPois(map) {
 		lineArr.push([arr[i], arr[i + 1]]);
 	}
 	return Helper.iteratorArr(lineArr, function (it) {
-		return walkingLinePois(map, it[0], it[1]);
+		var p1 = it[0];
+		var p2 = it[1];
+
+		if (map.getDistance(p1, p2) > 2000) {
+			return getDrivingPointsByStartEnd(map, p1, p2);
+		} else {
+			return getWalkingPointsByStartEnd(map, p1, p2);
+		}
 	}).then(function (arr) {
 		return arr.reduce(function (previous, current) {
 			return previous.concat(current);
@@ -518,10 +525,38 @@ var walkingGpsPois = function walkingGpsPois(map) {
 	});
 };
 
-var walkingLinePois = function walkingLinePois(map, p1, p2) {
+var walkingLine = function walkingLine(map) {
+	for (var _len3 = arguments.length, points = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+		points[_key3 - 1] = arguments[_key3];
+	}
+
+	return getWalkingPoints.apply(undefined, [map].concat(points)).then(function (point) {
+		return polyline(map, point);
+	});
+};
+
+var getWalkingPoints = function getWalkingPoints(map) {
+	for (var _len4 = arguments.length, arr = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+		arr[_key4 - 1] = arguments[_key4];
+	}
+
+	var lineArr = [];
+	for (var i = 0; i < arr.length - 1; i++) {
+		lineArr.push([arr[i], arr[i + 1]]);
+	}
+	return Helper.iteratorArr(lineArr, function (it) {
+		return getWalkingPointsByStartEnd(map, it[0], it[1]);
+	}).then(function (arr) {
+		return arr.reduce(function (previous, current) {
+			return previous.concat(current);
+		});;
+	});
+};
+
+var getWalkingPointsByStartEnd = function getWalkingPointsByStartEnd(map, p1, p2) {
 	return new Promise(function (resolve, reject) {
 		var walking = new BMap.WalkingRoute(map);
-		var arrPois = [];
+		var arrPoints = [];
 		walking.search(p1, p2);
 		walking.setSearchCompleteCallback(function (res) {
 			var plan = res.getPlan(0);
@@ -531,12 +566,66 @@ var walkingLinePois = function walkingLinePois(map, p1, p2) {
 	});
 };
 
-var WalkRoute = {
-	line: walkingGpsLine,
-	pois: walkingGpsPois,
-	polyline: polyline
+var drivingLine = function drivingLine(map) {
+	for (var _len5 = arguments.length, points = Array(_len5 > 1 ? _len5 - 1 : 0), _key5 = 1; _key5 < _len5; _key5++) {
+		points[_key5 - 1] = arguments[_key5];
+	}
+
+	return getDrivingLinePoints.apply(undefined, [map].concat(points)).then(function (point) {
+		return polyline(map, point);
+	});
 };
 
-module.exports = WalkRoute;
+var getDrivingLinePoints = function getDrivingLinePoints(map) {
+	for (var _len6 = arguments.length, arr = Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
+		arr[_key6 - 1] = arguments[_key6];
+	}
+
+	var lineArr = [];
+	for (var i = 0; i < arr.length - 1; i++) {
+		lineArr.push([arr[i], arr[i + 1]]);
+	}
+	return Helper.iteratorArr(lineArr, function (it) {
+		return getDrivingPointsByStartEnd(map, it[0], it[1]);
+	}).then(function (arr) {
+		return arr.reduce(function (previous, current) {
+			return previous.concat(current);
+		});;
+	});
+};
+
+var getDrivingPointsByStartEnd = function getDrivingPointsByStartEnd(map, p1, p2) {
+	return new Promise(function (resolve, reject) {
+		var driving = new BMap.DrivingRoute(map, {
+			policy: BMAP_DRIVING_POLICY_LEAST_DISTANCE
+		});
+		var arrPoints = [];
+		driving.search(p1, p2);
+		driving.setSearchCompleteCallback(function (res) {
+			var plan = res.getPlan(0);
+			var route = plan.getRoute(0);
+			return resolve(route.getPath());
+		});
+	});
+};
+
+var route = {
+	line: line,
+	getLinePoints: getLinePoints,
+
+	polyline: polyline,
+	walkingLine: walkingLine,
+	drivingLine: drivingLine,
+
+	getWalkingPoints: getWalkingPoints,
+	getDrivingLinePoints: getDrivingLinePoints
+
+	//getWalkingPointsByStartEnd: getWalkingPointsByStartEnd,
+	//getDrivingPointsByStartEnd: getDrivingPointsByStartEnd,
+
+
+};
+
+module.exports = route;
 
 },{"./helper.js":2}]},{},[3]);

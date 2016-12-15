@@ -9,7 +9,7 @@ exports.getWithDateAndId = function(id, date) {
 		}, {
 			norepeatroute: 1,
 			routecount: 1,
-			walkRoute: 1
+			routeLine: 1
 		})
 	}).then(function(data) {
 		db.close();

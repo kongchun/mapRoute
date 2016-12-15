@@ -1,13 +1,13 @@
 var db = require('./db.js');
 var mongodb = require("mongodb");
-var walkRoute = exports.walkRoute = function(_id, route) {
+var routeLine = exports.routeLine = function(_id, routeLine) {
 
 	return db.open("location").then(function(collection) {
 		return collection.update({
 			_id: mongodb.ObjectId(_id)
 		}, {
 			$set: {
-				walkRoute: route
+				routeLine: routeLine
 			}
 		})
 	}).then(function(data) {

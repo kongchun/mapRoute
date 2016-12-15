@@ -1,4 +1,4 @@
-var walkRoute = require("./walkRoute.js")
+var route = require("./route.js")
 var Helper = require("./helper.js");
 var GPS = require("./gps.js");
 var marker = require("./marker.js");
@@ -30,7 +30,7 @@ $(function() {
 	// var labels = getLabels();
 	// marker.labels(G_Map, labels);
 	// console.log("labels", labels)
-	//saveWalkline()
+	//saverouteLine()
 })
 
 function gpsCover(lng, lat) {
@@ -40,56 +40,38 @@ function gpsCover(lng, lat) {
 }
 
 function renderMap(data) {
-	var route = data.norepeatroute;
-	var count = data.routecount;
+	var norepeatroute = data.norepeatroute;
+	var routecount = data.routecount;
 	var _id = data._id;
-	var walkRouteData = data.walkRoute;
+	var routeLineData = data.routeLine;
 
-	var points = makePoint((route));
+	var points = makePoint((norepeatroute));
 	G_Map.setViewport(points);
 
-	if (walkRouteData) {
-		console.log(walkRouteData)
-		walkRoute.polyline(G_Map, walkRouteData.map((point) => {
+	if (routeLineData) {
+		//console.log(routeLineData)
+		route.polyline(G_Map, routeLineData.map((point) => {
 			return new BMap.Point(point.lng, point.lat);
 		}));
 	} else {
-		walkLine(_id, points);
+		routeLine(_id, points);
 	}
 
 	marker.points(G_Map, points);
-
-	var labels = getLabels(count);
-	marker.labels(G_Map, labels);
-}
-
-function getLabels(count) {
-
-	var labels = count.map((item) => {
-		var location = item.location;
-		var label = item.timerange;
-		var point = new BMap.Point(...location);
-
-		return {
-			point,
-			label
-		}
-	})
-
-	return labels;
-
+	marker.labels(G_Map, routecount);
 }
 
 
-function walkLine(_id, points) {
+
+function routeLine(_id, points) {
 	//console.log(Helper.filterPoint(route), "filter");
 
-	walkRoute.line(G_Map, ...points).then(function(arr) {
-		saveWalkline(_id, arr);
+	route.line(G_Map, ...points).then(function(arr) {
+		saveLine(_id, arr);
 	});
 }
 
-function saveWalkline(_id, walkRoute) {
+function saveLine(_id, routePath) {
 
 	/*var _id = "584e119559a5f00f64d8c1d3";
 	var walkRoute = [{
@@ -97,16 +79,16 @@ function saveWalkline(_id, walkRoute) {
 		lat: 31.132967
 	}]
 */
-	var url = "api/route/walk";
+	var url = "api/route/line";
 	$.post(url, {
 		_id: _id,
-		walkRoute: JSON.stringify(walkRoute)
+		line: JSON.stringify(routePath)
 	}, function() {
 
 	})
 }
 
-function saveWalkLine(arr) {
+function saverouteLine(arr) {
 	var pois = arr.map((point) => {
 		return point.lng + "," + point.lat
 	})

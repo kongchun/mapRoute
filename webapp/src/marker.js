@@ -55,22 +55,37 @@ var points = function(map, points) {
 
 var labels = function(map, routecount) {
 	routecount.map((i) => {
-		label(map, i.point, i.label);
+		var location = i.location;
+		var point = new BMap.Point(...location);
+		var addressLabel = "";
+
+		var pois = location.join(",");
+		var poisLabel = `<p><b>坐标：</b>${pois}</p>`;
+
+		var address = i.address;
+		if (address) {
+			var name = address.name;
+			var tag = address.tag;
+			addressLabel = `<p><b>地点：</b>${name}</p><p><b>标签：</b>${tag}</p>`;
+		}
+		var time = i.timerange.map((i) => {
+			return `${i}`
+		}).join(",");
+
+		var labels = `<p><b>时间：</b>${time}</p>${addressLabel}${poisLabel}`;
+
+		label(map, point, labels);
 	})
 }
 
 var label = function(map, point, label) {
-	var labels = label.map((i) => {
-		return `<p>${i}</p>`
-	}).join("");
 	var opts = {
 		position: point, // 指定文本标注所在的地理位置
-		offset: new BMap.Size(25, -(12 * label.length) - 30) //设置文本偏移量
+		offset: new BMap.Size(25, -60) //设置文本偏移量
 	}
-	var label = new BMap.Label(labels, opts); // 创建文本标注对象
+	var label = new BMap.Label(label, opts); // 创建文本标注对象
 	label.setStyle({
 		borderColor: "#222"
-
 	});
 	arr.push(label);
 	map.addOverlay(label);

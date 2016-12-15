@@ -17,10 +17,10 @@ router.get('/route', function(req, res, next) {
 	});
 });
 
-router.post('/route/walk', function(req, res, next) {
+router.post('/route/line', function(req, res, next) {
 	var _id = (req.body._id);
-	var walkRoute = JSON.parse(req.body.walkRoute);
-	write.walkRoute(_id, walkRoute).then(function() {
+	var line = JSON.parse(req.body.line);
+	write.routeLine(_id, line).then(function() {
 		res.send({
 			result: true
 		});
